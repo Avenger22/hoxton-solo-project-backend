@@ -510,6 +510,7 @@ app.get('/videos', async (req, res) => {
         { 
           userWhoCreatedIt: true, 
           comments: true, 
+          category: true,
           usersWhoLikedIt: { 
             include: { 
             user: {
@@ -573,7 +574,7 @@ app.get('/videos', async (req, res) => {
 
     }
     
-    let updatedvideoWithCounts = await prisma.video.findMany({
+    let updatedVideoWithCounts = await prisma.video.findMany({
 
       include: 
         { 
@@ -581,7 +582,7 @@ app.get('/videos', async (req, res) => {
           userWhoCreatedIt: { include: { avatar: true } }, 
 
           comments: { include: { userWhoCreatedIt: true, video: true } }, 
-
+          category: true,
           usersWhoLikedIt: { 
             include: { 
             user: {
@@ -600,7 +601,7 @@ app.get('/videos', async (req, res) => {
 
     })
 
-    res.send(updatedvideoWithCounts)
+    res.send(updatedVideoWithCounts)
 
   }
 
@@ -625,7 +626,7 @@ app.get('/videos/:id', async (req, res) => {
 
           userWhoCreatedIt: true,
           comments: true,
-
+          category: true,
           usersWhoLikedIt: { 
             include: { 
             user: {
@@ -672,7 +673,7 @@ app.get('/videos/:id', async (req, res) => {
           userWhoCreatedIt: { include: { avatar: true } }, 
 
           comments: { include: { userWhoCreatedIt: true, video: true } }, 
-
+          category: true,
           usersWhoLikedIt: { 
             include: { 
             user: {
@@ -719,38 +720,37 @@ app.post('/videos', async (req, res) => {
     countCommentsInside,
     countLikesInside,
     src, 
-    userId 
+    userId,
+    categoryId
   } = req.body
   
-  const newvideo = {
+  const newVideo = {
     title: title,
     createdAt: createdAt,
     updatedAt: updatedAt,
     countCommentsInside,
     countLikesInside,
     src:  src,
-    userId: userId
+    userId: userId,
+    categoryId: categoryId
   }
 
   try {
 
     const user = await getUserFromToken(token)
-
-    //@ts-ignore
-    // const videoCheck = await prisma.video.findFirst({ where: { userId: user.id }} )
-    
+  
     if (user) {
 
       try {
 
-        await prisma.video.create({data: newvideo})
-        let getAllvideos = await prisma.video.findMany({
+        await prisma.video.create({data: newVideo})
+        let getAllVideos = await prisma.video.findMany({
 
           include: 
             { 
     
               userWhoCreatedIt: { include: { avatar: true } }, 
-    
+              category: true,
               comments: { include: { userWhoCreatedIt: true, video: true } }, 
     
               usersWhoLikedIt: { 
@@ -771,7 +771,7 @@ app.post('/videos', async (req, res) => {
     
         })
 
-        res.send(getAllvideos)
+        res.send(getAllVideos)
 
       }
 
@@ -816,7 +816,7 @@ app.delete('/videos/:id', async (req, res) => {
         where: { id: Number(idParam) }
       })
 
-      let getAllvideos = await prisma.video.findMany({
+      let getAllVideos = await prisma.video.findMany({
 
         include: 
           { 
@@ -824,7 +824,7 @@ app.delete('/videos/:id', async (req, res) => {
             userWhoCreatedIt: { include: { avatar: true } }, 
   
             comments: { include: { userWhoCreatedIt: true, video: true } }, 
-  
+            category: true,
             usersWhoLikedIt: { 
               include: { 
               user: {
@@ -843,7 +843,7 @@ app.delete('/videos/:id', async (req, res) => {
   
       })
 
-      res.send(getAllvideos)
+      res.send(getAllVideos)
 
     }
 
@@ -873,17 +873,19 @@ app.patch('/videos/:id', async (req, res) => {
     countCommentsInside,
     countLikesInside,
     src, 
-    userId 
+    userId,
+    categoryId
   } = req.body
 
-  const updatedvideo = {
+  const updatedVideo = {
     title: title,
     createdAt: createdAt,
     updatedAt: updatedAt,
     countCommentsInside,
     countLikesInside,
     src:  src,
-    userId: userId
+    userId: userId,
+    categoryId: categoryId
   }
 
   try {
@@ -905,11 +907,11 @@ app.patch('/videos/:id', async (req, res) => {
             id: user.id
           },
 
-          data: updatedvideo
+          data: updatedVideo
 
         })
 
-        let getAllvideos = await prisma.video.findMany({
+        let getAllVideos = await prisma.video.findMany({
 
           include: 
             { 
@@ -917,7 +919,7 @@ app.patch('/videos/:id', async (req, res) => {
               userWhoCreatedIt: { include: { avatar: true } }, 
     
               comments: { include: { userWhoCreatedIt: true, video: true } }, 
-    
+              category: true,
               usersWhoLikedIt: { 
                 include: { 
                 user: {
@@ -936,7 +938,7 @@ app.patch('/videos/:id', async (req, res) => {
     
         })
 
-        res.send(getAllvideos)
+        res.send(getAllVideos)
 
       }
 
@@ -2973,6 +2975,333 @@ app.patch('/subscribers/:id', async (req, res) => {
   
   catch(error) {
     res.status(404).send({message: error})
+  }
+
+})
+// #endregion
+
+// #region "videoHashtags endpoints"
+app.get('/videoHashtags', async (req, res) => {
+
+  try {
+
+    //@ts-ignore
+    const videoHashtags = await prisma.videoHashtag.findMany({ 
+      include: 
+        { video: true, hashtag: true } 
+      })
+
+    res.send(videoHashtags)
+
+  }
+
+  catch(error) {
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.get('/videoHashtags/:id', async (req, res) => {
+
+  const idParam = Number(req.params.id)
+
+  try {
+
+    //@ts-ignore
+    const videoHashtag = await prisma.videoHashtag.findFirst({ 
+      where: { id: idParam },
+      include: 
+        { hashtag: true, video: true } 
+      })
+  
+
+    if (videoHashtag) {
+      res.send(videoHashtag)
+    } 
+    
+    else {
+      res.status(404).send({ error: 'videoHashtag not found.' })
+    }
+
+  }
+
+  catch(error){
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.post('/videoHashtags', async (req, res) => {
+    
+  const token = req.headers.authorization || ''
+  
+  const { 
+    hashtagId, 
+    videoId  
+  } = req.body
+  
+  const newVideoHashtag = { 
+    hashtagId: hashtagId,
+    videoId: videoId
+  }
+
+  try {
+
+    const user = await getUserFromToken(token)
+    
+    if (user) {
+
+      try {
+
+        //@ts-ignore
+        const createdVideoHashtag = await prisma.videoHashtag.create({data: newVideoHashtag})
+        
+        //@ts-ignore
+        const createdVideoHashtagFull = await prisma.videoHashtag.findFirst({
+          where: { id: createdVideoHashtag.id },
+          include: {
+            hashtag: true, video: true
+          }
+        })
+
+        res.send(createdVideoHashtagFull)
+        
+      }
+
+      catch(error) {
+        //@ts-ignore
+        res.status(400).send(`<prev>${error.message}</prev>`)
+      }
+
+    }
+
+    else {
+      res.status(404).send({ error: 'user is not authorized to do this' })
+    }
+
+
+  }
+
+  catch(error) {
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.delete('/videoHashtags/:id', async (req, res) => {
+
+  const token = req.headers.authorization || ''
+  const idParam = req.params.id
+  
+  try {
+
+    // check that they are signed in
+    const user = await getUserFromToken(token)
+
+    //@ts-ignore
+    const videoHashtagMatch = await prisma.videoHashtag.findUnique( { where: {id: Number(idParam)} } )
+
+    if (user) {
+
+      //@ts-ignore
+      await prisma.videoHashtag.delete({ 
+        where: { id: Number(idParam) }
+      })
+
+      //@ts-ignore
+      const videoHashtags = await prisma.videoHashtag.findMany( { where: { userId: user.id } } )
+
+      // res.send(orderDeleted)
+      res.send(videoHashtags)
+
+    }
+
+    else {
+      res.status(404).send({ error: 'videoHashtag not found, or the videoHashtag doesnt belong to that user to be deleted.' })
+    }
+
+  }
+
+  catch(error) {
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.patch('/videoHashtags/:id', async (req, res) => {
+
+  const token = req.headers.authorization || ''
+  const idParam = Number(req.params.id);
+  
+  const { 
+    hashtagId, 
+    videoId  
+  } = req.body
+  
+  const updatedVideoHashtag = { 
+    hashtagId: hashtagId,
+    videoId: videoId
+  }
+
+  try {
+
+    const user = await getUserFromToken(token)
+         
+    if (user) {
+
+      try {
+
+        //@ts-ignore
+        const videoHashtagUpdated = await prisma.videoHashtag.update({
+
+          where: {
+            id: user.id,
+          },
+
+          data: updatedVideoHashtag
+
+        })
+
+        //@ts-ignore
+        const videoHashtagUpdatedFull = await prisma.videoHashtag.findFirst({
+          where: { id: videoHashtagUpdated.id },
+          include: {
+            hashtag: true, video: true
+          }
+        })
+
+        res.send(videoHashtagUpdatedFull)
+
+      }
+
+      catch(error) {
+        res.status(404).send({message: error})
+      }
+
+    }
+
+    else {
+      throw Error('Error!')
+    }
+
+  }  
+  
+  catch(error) {
+    res.status(404).send({message: error})
+  }
+
+})
+// #endregion
+
+// #region "categories endpoints"
+app.get('/categories', async (req, res) => {
+
+  try {
+
+    //@ts-ignore
+    const categories = await prisma.category.findMany({ 
+      include: 
+        //@ts-ignore
+        { videos: true }
+      })
+
+    res.send(categories)
+
+  }
+
+  catch(error) {
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.get('/categories/:id', async (req, res) => {
+
+  const idParam = Number(req.params.id)
+
+  try {
+
+    //@ts-ignore
+    const category = await prisma.category.findFirst({
+      where: { id: idParam },
+      include: 
+        //@ts-ignore
+        { videos: true } 
+      })
+  
+
+    if (category) {
+      res.send(category)
+    } 
+    
+    else {
+      res.status(404).send({ error: 'category not found.' })
+    }
+
+  }
+
+  catch(error){
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+// #endregion
+
+// #region "hashtags endpoints"
+app.get('/hashtags', async (req, res) => {
+
+  try {
+
+    //@ts-ignore
+    const hashtags = await prisma.hashtag.findMany({ 
+      include: 
+        { videos: { include: { video: true } } } 
+      })
+
+    res.send(hashtags)
+
+  }
+
+  catch(error) {
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.get('/hashtags/:id', async (req, res) => {
+
+  const idParam = Number(req.params.id)
+
+  try {
+
+    //@ts-ignore
+    const hashtag = await prisma.hashtag.findFirst({
+      where: { id: idParam },
+      include: 
+        { videos: {include: { video: true } } } 
+      })
+  
+
+    if (hashtag) {
+      res.send(hashtag)
+    } 
+    
+    else {
+      res.status(404).send({ error: 'hashtag not found.' })
+    }
+
+  }
+
+  catch(error){
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
   }
 
 })

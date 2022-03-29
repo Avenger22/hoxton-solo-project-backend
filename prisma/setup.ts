@@ -83,7 +83,8 @@ const videos = [
     countCommentsInside: 0,
     countLikesInside: 0,
     src: "",
-    userId: 1
+    userId: 1,
+    categoryId: 1
   },
   {
     id: 2,
@@ -94,7 +95,8 @@ const videos = [
     countCommentsInside: 0,
     countLikesInside: 0,
     src: "",
-    userId: 2
+    userId: 2,
+    categoryId: 2
   },
   {
     id: 3,
@@ -105,7 +107,8 @@ const videos = [
     countCommentsInside: 0,
     countLikesInside: 0,
     src: "",
-    userId: 1
+    userId: 1,
+    categoryId: 2
   }
 ]
 
@@ -215,10 +218,57 @@ const subscribers = [
   }
 ]
 
+const categories = [
+  {
+    id: 1,
+    name: "Football"
+  },
+  {
+    id: 2,
+    name: "Fighting"
+  } 
+]
+
+const videoHashtags = [
+  {
+    id: 1,
+    videoId: 1,
+    hashtagId: 1
+  },
+  {
+    id: 2,
+    videoId: 2,
+    hashtagId: 2
+  },
+  {
+    id: 3,
+    videoId: 3,
+    hashtagId: 2
+  }
+]
+
+const hashtags = [
+  {
+    id: 1,
+    name: "Soccer"
+  },
+  {
+    id: 2,
+    name: "funny"
+  }
+]
+
 async function createStuff () {
 
   await prisma.commentLike.deleteMany()
   await prisma.commentDislike.deleteMany()
+
+  // @ts-ignore
+  await prisma.category.deleteMany()
+  // @ts-ignore
+  await prisma.videoHashtag.deleteMany()
+  // @ts-ignore
+  await prisma.hashtag.deleteMany()
 
   await prisma.videoLike.deleteMany()
   await prisma.videoDislike.deleteMany()
@@ -236,6 +286,11 @@ async function createStuff () {
     await prisma.user.create({ data: user })
   }
 
+  for (const category of categories) {
+    //@ts-ignore
+    await prisma.category.create({ data: category })
+  }
+  
   for (const video of videos) {
     await prisma.video.create({ data: video })
   }
@@ -266,6 +321,16 @@ async function createStuff () {
 
   for (const commentDislike of commentDislikes) {
     await prisma.commentDislike.create({ data: commentDislike })
+  }
+
+  for (const hashtag of hashtags) {
+    //@ts-ignore
+    await prisma.hashtag.create({ data: hashtag })
+  }
+
+  for (const videoHashtag of videoHashtags) {
+    //@ts-ignore
+    await prisma.videoHashtag.create({ data: videoHashtag })
   }
 
   for (const subscribe of subscribers) {
