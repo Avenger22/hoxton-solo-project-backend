@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int           @id @default(autoincrement())
+  firstName            String
+  lastName             String
+  userName             String        @unique
+  gender               String        @default("M")
+  birthday             String
+  phoneNumber          String        @default("0691111111")
+  email                String        @unique
+  password             String
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @default(now())
+  description          String        @default("")
+  
+  logins               Login[]
+  avatar               Avatar[]
+  videos               Video[]
+  comments             Comment[]
+  
+  commentsLiked        CommentLike[]
+  commentsDisliked     CommentDislike[]
+  
+  videosLiked          VideoLike[]
+  videosDisliked       VideoDislike[]
+  
+  subscribedBy         Subscribe[]   @relation("subscriber")
+  subscribing          Subscribe[]   @relation("subscribing")
+  
+  countvideosCreated   Int           @default(0)
+  countCommentsCreated Int           @default(0)
+  countCommentsLiked   Int           @default(0)
+  countCommentsDisliked Int          @default(0)
+  countVideosLiked     Int           @default(0)
+  countVideosDisliked  Int           @default(0)
+  countLogins          Int           @default(0)
+  countSubscribers     Int           @default(0)
+  countSubscribing     Int           @default(0)
+}
+
+model Video {
+  id               Int         @id @default(autoincrement())
+  title         String
+  description      String      @default("")
+  category         String      @default("all")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @default(now())
+  
+  countCommentsInside Int           @default(0)
+  countLikesInside    Int           @default(0)
+  countDislikesInside    Int           @default(0)
+  
+  src              String
+  userId           Int
+  
+  userWhoCreatedIt User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  comments         Comment[]
+  usersWhoLikedIt  VideoLike[]
+  usersWhoDislikedIt VideoDislike[]
+}
+
+model Comment {
+  id               Int           @id @default(autoincrement())
+  content          String        @default("")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now())
+  
+  userId           Int
+  videoId          Int
+  
+  countLikesInside Int           @default(0)
+  countDislikesInside Int        @default(0)
+
+  video            Video         @relation(fields: [videoId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userWhoCreatedIt User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  usersWhoLikedIt  CommentLike[]
+  usersWhoDislikedIt  CommentDislike[]
+}
+
+model Login {
+  id        Int      @id @default(autoincrement())
+  status    String   @default("success")
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Avatar {
+  id        Int      @id @default(autoincrement())
+  src       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  userId    Int
+  commentId Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model CommentDislike {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  userId    Int
+  commentId Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model VideoLike {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  userId    Int
+  videoId   Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model VideoDislike {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  userId    Int
+  videoId   Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Subscribe {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  subscriber    User     @relation("subscriber", fields: [subscriberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  subscriberId  Int
+  subscribing   User     @relation("subscribing", fields: [subscribingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  subscribingId Int
+}
