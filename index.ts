@@ -27,19 +27,18 @@ app.post('/upload', (req, res) => {
   }
 
   //@ts-ignore
-  const file = req.files.file;
+  const file = req.files.file
 
   //@ts-ignore
-  file.mv(`${__dirname}/client/public/uploads/${file.name}`, err => {
+  const fileName = req.files.file.name
+  const path = 'uploads/' + fileName
 
-    if (err) {
-      console.error(err);
-      return res.status(500).send(err);
-    }
+  file.mv(path, function(err:any) {
 
-    //@ts-ignore
+    if (err) return res.status(500).send(err);
+    // res.send('File uploaded!');
     res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
-
+    
   });
 
 });
