@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
+const fileUpload = require('express-fileupload');
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error']
@@ -13,6 +14,35 @@ const prisma = new PrismaClient({
 const app = express()
 app.use(cors())
 app.use(express.json())
+app.use(fileUpload());
+// #endregion
+
+
+// #region 'Upload endpoint'
+app.post('/upload', (req, res) => {
+
+  //@ts-ignore
+  if (req.files === null) {
+    return res.status(400).json({ msg: 'No file uploaded' });
+  }
+
+  //@ts-ignore
+  const file = req.files.file;
+
+  //@ts-ignore
+  file.mv(`${__dirname}/client/public/uploads/${file.name}`, err => {
+
+    if (err) {
+      console.error(err);
+      return res.status(500).send(err);
+    }
+
+    //@ts-ignore
+    res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
+
+  });
+
+});
 // #endregion
 
 
@@ -3309,6 +3339,10 @@ app.get('/hashtags/:id', async (req, res) => {
 
 // #endregion
 
+
+app.get('/', async (req, res) => {
+  res.send("Server Up and Running")
+})
 
 app.listen(4000, () => {
   console.log(`Server up: http://localhost:4000`)
