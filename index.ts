@@ -31,13 +31,16 @@ app.post('/upload', (req, res) => {
 
   //@ts-ignore
   const fileName = req.files.file.name
-  const path = 'uploads/' + fileName
+  const path = 'public/uploads/videos/' + fileName
 
+  //@ts-ignore
   file.mv(path, function(err:any) {
 
     if (err) return res.status(500).send(err);
     // res.send('File uploaded!');
-    res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
+
+    //@ts-ignore
+    res.json({ fileName: file.name, filePath: `public/uploads/videos/${file.name}` });
     
   });
 

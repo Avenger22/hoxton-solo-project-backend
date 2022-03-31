@@ -16,8 +16,6 @@ const users = [
     phoneNumber: '06933344123',
     email: 'jurgenhasmeta@email.com',
     password: bcrypt.hashSync("jurgen123", 8),
-    createdAt: "2020-03-18T14:21:00+02:00",
-    updatedAt: "2021-03-18T14:21:00+02:00",
     description: "I am jurgen hasmeta"
   },
   {
@@ -30,8 +28,6 @@ const users = [
     phoneNumber: '06723344123',
     email: 'andrea@email.com',
     password: bcrypt.hashSync("egon123", 8),
-    createdAt: "2018-01-18T14:21:00+02:00",
-    updatedAt: "2022-03-18T14:21:00+02:00",
     description: "I am andrea"
   }
 ]
@@ -39,20 +35,17 @@ const users = [
 const logins = [
   {
     id: 1,
-    status: "succes",
-    createdAt: "2021-03-18T14:21:00+02:00",
+    status: "success",
     userId: 1
   },
   {
     id: 2,
     status: "success",
-    createdAt: "2020-02-18T14:21:00+02:00",
     userId: 1
   },
   {
     id: 3,
     status: "success",
-    createdAt: "2018-01-18T14:21:00+02:00",
     userId: 2
   }
 ]
@@ -61,15 +54,11 @@ const avatars = [
   {
     id: 1,
     src: "/assets/avatars/jurgen-avatar.jpg",
-    createdAt: "2020-05-18T14:21:00+02:00",
-    updatedAt: "2020-07-18T14:21:00+02:00",
     userId: 1
   },
   {
     id: 2,
     src: "/assets/avatars/egon-avatar.jpg",
-    createdAt: "2010-05-18T14:21:00+02:00",
-    updatedAt: "2020-07-18T14:21:00+02:00",
     userId: 2
   }
 ]
@@ -77,38 +66,46 @@ const avatars = [
 const videos = [
   {
     id: 1,
-    title: "inter 3-1 liverpool highlits",
-    createdAt: "2020-05-18T14:21:00+02:00",
-    updatedAt: "2020-07-18T14:21:00+02:00",
+    title: "Amazing team goal tiki-taka",
     countCommentsInside: 0,
     countLikesInside: 0,
-    src: "",
+    src: "/uploads/videos/tikitaka.mp4",
+    thumbnail: "/uploads/thumbnails/tikitaka.jpg",
     userId: 1,
     categoryId: 1
   },
   {
     id: 2,
-    title: "watch this getting punched",
+    title: "Ronaldinho like trick done by odegard",
     description: "",
-    createdAt: "2020-08-18T14:21:00+02:00",
-    updatedAt: "2020-07-18T14:21:00+02:00",
     countCommentsInside: 0,
     countLikesInside: 0,
-    src: "",
+    src: "/uploads/videos/amazing skill look.mp4",
+    thumbnail: "/uploads/thumbnails/amazing-skill.jpg",
     userId: 2,
-    categoryId: 2
+    categoryId: 1
   },
   {
     id: 3,
-    title: "watch this getting punched again this time by tyson",
+    title: "Compilation of trick in football",
     description: "",
-    createdAt: "2020-02-18T14:21:00+02:00",
-    updatedAt: "2020-08-18T14:21:00+02:00",
     countCommentsInside: 0,
     countLikesInside: 0,
-    src: "",
+    src: "/uploads/videos/skills-and -goals.mp4",
+    thumbnail: "/uploads/thumbnails/skills-and-goals.jpg",
     userId: 1,
-    categoryId: 2
+    categoryId: 1
+  },
+  {
+    id: 4,
+    title: "Iniesta amazing skills",
+    description: "",
+    countCommentsInside: 0,
+    countLikesInside: 0,
+    src: "/uploads/videos/iniesta-skill.mp4",
+    thumbnail: "/uploads/thumbnails/iniesta-skill.jpg",
+    userId: 2,
+    categoryId: 1
   }
 ]
 
@@ -116,8 +113,6 @@ const comments = [
   {
     id: 1,
     content: "hi i am jurgen",
-    createdAt: "2020-01-18T14:21:00+02:00",
-    updatedAt: "2020-02-18T14:21:00+02:00",
     userId: 1,
     videoId: 2,
     countLikesInside: 0
@@ -125,8 +120,6 @@ const comments = [
   {
     id: 2,
     content: "hi i am egon",
-    createdAt: "2020-08-18T14:21:00+02:00",
-    updatedAt: "2020-09-18T14:21:00+02:00",
     userId: 2,
     videoId: 1,
     countLikesInside: 0
@@ -136,15 +129,11 @@ const comments = [
 const commentLikes = [
   {
     id: 1,
-    createdAt: "2020-05-18T14:21:00+02:00",
-    updatedAt: "2020-06-18T14:21:00+02:00",
     userId: 1,
     commentId: 2
   },
   {
     id: 2,
-    createdAt: "2020-09-18T14:21:00+02:00",
-    updatedAt: "2020-10-18T14:21:00+02:00",
     userId: 2,
     commentId: 1
   }
@@ -153,15 +142,11 @@ const commentLikes = [
 const commentDislikes = [
   {
     id: 1,
-    createdAt: "2020-05-18T14:21:00+02:00",
-    updatedAt: "2020-06-18T14:21:00+02:00",
     userId: 1,
     commentId: 1
   },
   {
     id: 2,
-    createdAt: "2020-09-18T14:21:00+02:00",
-    updatedAt: "2020-10-18T14:21:00+02:00",
     userId: 2,
     commentId: 2
   }
@@ -170,15 +155,11 @@ const commentDislikes = [
 const videoLikes = [
   {
     id: 1,
-    createdAt: "2020-02-18T14:21:00+02:00",
-    updatedAt: "2020-08-18T14:21:00+02:00",
     userId: 1,
     videoId: 2
   },
   {
     id: 2,
-    createdAt: "2020-09-18T14:21:00+02:00",
-    updatedAt: "2020-11-18T14:21:00+02:00",
     userId: 2,
     videoId: 1
   }
@@ -187,15 +168,11 @@ const videoLikes = [
 const videoDislikes = [
   {
     id: 1,
-    createdAt: "2020-02-18T14:21:00+02:00",
-    updatedAt: "2020-08-18T14:21:00+02:00",
     userId: 1,
     videoId: 1
   },
   {
     id: 2,
-    createdAt: "2020-09-18T14:21:00+02:00",
-    updatedAt: "2020-11-18T14:21:00+02:00",
     userId: 2,
     videoId: 2
   }
@@ -204,15 +181,11 @@ const videoDislikes = [
 const subscribers = [
   {
     id: 1,
-    createdAt: "2020-02-18T14:21:00+02:00",
-    updatedAt: "2020-08-18T14:21:00+02:00",
     subscriberId: 1,
     subscribingId: 2
   },
   {
     id: 2,
-    createdAt: "2020-02-18T14:21:00+02:00",
-    updatedAt: "2020-08-18T14:21:00+02:00",
     subscriberId: 2,
     subscribingId: 1
   }
@@ -250,7 +223,7 @@ const videoHashtags = [
 const hashtags = [
   {
     id: 1,
-    name: "Soccer"
+    name: "soccer"
   },
   {
     id: 2,
