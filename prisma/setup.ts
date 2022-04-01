@@ -53,12 +53,12 @@ const logins = [
 const avatars = [
   {
     id: 1,
-    src: "/assets/avatars/jurgen-avatar.jpg",
+    src: "/public/uploads/avatars/jurgen-avatar.jpg",
     userId: 1
   },
   {
     id: 2,
-    src: "/assets/avatars/egon-avatar.jpg",
+    src: "/public/uploads/avatars/egon-avatar.jpg",
     userId: 2
   }
 ]
@@ -66,44 +66,44 @@ const avatars = [
 const videos = [
   {
     id: 1,
-    title: "Amazing team goal tiki-taka",
+    title: "tikitaka",
     countCommentsInside: 0,
     countLikesInside: 0,
-    src: "/uploads/videos/tikitaka.mp4",
-    thumbnail: "/uploads/thumbnails/tikitaka.jpg",
+    src: "/public/uploads/videos/tikitaka.mp4",
+    thumbnail: "/public/uploads/thumbnails/tikitaka.jpg",
     userId: 1,
     categoryId: 1
   },
   {
     id: 2,
-    title: "Ronaldinho like trick done by odegard",
+    title: "amazing skill look",
     description: "",
     countCommentsInside: 0,
     countLikesInside: 0,
-    src: "/uploads/videos/amazing skill look.mp4",
-    thumbnail: "/uploads/thumbnails/amazing-skill.jpg",
+    src: "/public/uploads/videos/amazing skill look.mp4",
+    thumbnail: "/public/uploads/thumbnails/amazing skill look.jpg",
     userId: 2,
     categoryId: 1
   },
   {
     id: 3,
-    title: "Compilation of trick in football",
+    title: "skills and goals",
     description: "",
     countCommentsInside: 0,
     countLikesInside: 0,
-    src: "/uploads/videos/skills-and -goals.mp4",
-    thumbnail: "/uploads/thumbnails/skills-and-goals.jpg",
+    src: "/public/uploads/videos/skills and goals.mp4",
+    thumbnail: "/public/uploads/thumbnails/skills and goals.jpg",
     userId: 1,
     categoryId: 1
   },
   {
     id: 4,
-    title: "Iniesta amazing skills",
+    title: "iniesta skill",
     description: "",
     countCommentsInside: 0,
     countLikesInside: 0,
-    src: "/uploads/videos/iniesta-skill.mp4",
-    thumbnail: "/uploads/thumbnails/iniesta-skill.jpg",
+    src: "/public/uploads/videos/iniesta skill.mp4",
+    thumbnail: "/public/uploads/thumbnails/iniesta skill.jpg",
     userId: 2,
     categoryId: 1
   }
