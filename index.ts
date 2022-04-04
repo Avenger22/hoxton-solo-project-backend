@@ -102,6 +102,17 @@ app.get("/thumbnail/:title", function (req, res) {
   res.sendFile(imagePath)
 
 });
+
+app.get("/avatar/:userName", function (req, res) {
+
+  const userName = req.params.userName
+
+  //@ts-ignore
+  const imagePath = __dirname + `/public/uploads/avatars/${userName}.jpg`;
+
+  res.sendFile(imagePath)
+
+});
 // #endregion
 
 
@@ -805,7 +816,8 @@ app.post('/videos', async (req, res) => {
   const { 
     title, 
     createdAt, 
-    updatedAt, 
+    updatedAt,
+    views, 
     countCommentsInside,
     countLikesInside,
     src, 
@@ -817,6 +829,7 @@ app.post('/videos', async (req, res) => {
     title: title,
     createdAt: createdAt,
     updatedAt: updatedAt,
+    views: views,
     countCommentsInside,
     countLikesInside,
     src:  src,
@@ -959,6 +972,7 @@ app.patch('/videos/:id', async (req, res) => {
     title,  
     createdAt, 
     updatedAt, 
+    views,
     countCommentsInside,
     countLikesInside,
     src, 
@@ -970,6 +984,7 @@ app.patch('/videos/:id', async (req, res) => {
     title: title,
     createdAt: createdAt,
     updatedAt: updatedAt,
+    views: views,
     countCommentsInside,
     countLikesInside,
     src:  src,
@@ -1258,7 +1273,9 @@ app.post('/comments', async (req, res) => {
           } 
         })
 
-        let getAllvideos = await prisma.video.findMany({
+        let getVideo = await prisma.video.findFirst({
+
+          where: { id: videoId },
 
           include: 
             { 
@@ -1285,7 +1302,7 @@ app.post('/comments', async (req, res) => {
     
         })
 
-        res.send(getAllvideos)
+        res.send(getVideo)
 
       }
 
@@ -1326,11 +1343,16 @@ app.delete('/comments/:id', async (req, res) => {
 
     if (user && commentUserCheck) {
 
+      const comment = await prisma.comment.findUnique({where: { id : Number(idParam) }})
+      const videoId = comment.videoId
+
       await prisma.comment.delete({ 
         where: { id: Number(idParam) }
       })
 
-      let getAllvideos = await prisma.video.findMany({
+      let getVideo = await prisma.video.findFirst({
+
+        where: { id: videoId },
 
         include: 
           { 
@@ -1357,7 +1379,7 @@ app.delete('/comments/:id', async (req, res) => {
   
       })
 
-      res.send(getAllvideos)
+      res.send(getVideo)
 
     }
 
@@ -1410,7 +1432,7 @@ app.patch('/comments/:id', async (req, res) => {
 
       try {
 
-        const commentUpdated = await prisma.comment.update({
+        await prisma.comment.update({
 
           where: {
             id: user.id,
@@ -1420,7 +1442,9 @@ app.patch('/comments/:id', async (req, res) => {
 
         })
 
-        let getAllvideos = await prisma.video.findMany({
+        let getVideo = await prisma.video.findMany({
+
+          where: { id: videoId },
 
           include: 
             { 
@@ -1447,7 +1471,7 @@ app.patch('/comments/:id', async (req, res) => {
     
         })
 
-        res.send(getAllvideos)
+        res.send(getVideo)
 
       }
 

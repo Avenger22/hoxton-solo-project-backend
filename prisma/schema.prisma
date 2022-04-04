@@ -57,6 +57,7 @@ model Video {
   thumbnail        String      @default("")
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @default(now())
+  views            Int         @default(0)
   
   countCommentsInside Int           @default(0)
   countLikesInside    Int           @default(0)
