@@ -20,7 +20,7 @@ app.use(fileUpload());
 
 
 // #region 'Upload endpoint'
-app.post('/upload', (req, res) => {
+app.post("/uploadVideo", (req, res) => {
 
   //@ts-ignore
   if (req.files === null) {
@@ -41,7 +41,34 @@ app.post('/upload', (req, res) => {
     // res.send('File uploaded!');
 
     //@ts-ignore
-    res.json({ fileName: file.name, filePath: `public/uploads/videos/${file.name}` });
+    res.json({ fileName: file.name, filePath: `public/uploads/videos/${file.name}`});
+    
+  });
+
+});
+
+app.post("/uploadThumbnail", (req, res) => {
+
+  //@ts-ignore
+  if (req.files === null) {
+    return res.status(400).json({ msg: 'No file uploaded' });
+  }
+
+  //@ts-ignore
+  const file = req.files.file
+
+  //@ts-ignore
+  const fileName = req.files.file.name
+  const path = 'public/uploads/thumbnails/' + fileName
+
+  //@ts-ignore
+  file.mv(path, function(err:any) {
+
+    if (err) return res.status(500).send(err);
+    // res.send('File uploaded!');
+
+    //@ts-ignore
+    res.json({ fileName: file.name, filePath: `public/uploads/thumbnails/${file.name}`});
     
   });
 
@@ -815,11 +842,7 @@ app.post('/videos', async (req, res) => {
   
   const { 
     title, 
-    createdAt, 
-    updatedAt,
-    views, 
-    countCommentsInside,
-    countLikesInside,
+    thumbnail,
     src, 
     userId,
     categoryId
@@ -827,11 +850,7 @@ app.post('/videos', async (req, res) => {
   
   const newVideo = {
     title: title,
-    createdAt: createdAt,
-    updatedAt: updatedAt,
-    views: views,
-    countCommentsInside,
-    countLikesInside,
+    thumbnail: thumbnail,
     src:  src,
     userId: userId,
     categoryId: categoryId
@@ -1058,6 +1077,83 @@ app.patch('/videos/:id', async (req, res) => {
 
   } 
   
+  catch(error) {
+    res.status(404).send({message: error})
+  }
+
+})
+
+app.patch('/videosViews/:id', async (req, res) => {
+  
+  const idParam = Number(req.params.id)
+  
+  const { 
+    title,  
+    createdAt, 
+    updatedAt, 
+    views,
+    countCommentsInside,
+    countLikesInside,
+    src, 
+    userId,
+    categoryId
+  } = req.body
+
+  const updatedVideo = {
+    title: title,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    views: views,
+    countCommentsInside,
+    countLikesInside,
+    src:  src,
+    userId: userId,
+    categoryId: categoryId
+  }
+
+  try {
+        
+    await prisma.video.update({
+
+      where: {
+        id: idParam
+      },
+
+      data: updatedVideo
+
+    })
+
+    let getAllVideos = await prisma.video.findMany({
+
+      include: 
+        { 
+
+          userWhoCreatedIt: { include: { avatar: true } }, 
+
+          comments: { include: { userWhoCreatedIt: true, video: true } }, 
+          category: true,
+          usersWhoLikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          }
+        }
+  
+      })
+
+      res.send(getAllVideos)
+
+  }
+
   catch(error) {
     res.status(404).send({message: error})
   }
@@ -1344,7 +1440,7 @@ app.delete('/comments/:id', async (req, res) => {
     if (user && commentUserCheck) {
 
       const comment = await prisma.comment.findUnique({where: { id : Number(idParam) }})
-      const videoId = comment.videoId
+      const videoId = comment?.videoId
 
       await prisma.comment.delete({ 
         where: { id: Number(idParam) }
