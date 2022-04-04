@@ -47,6 +47,28 @@ app.post("/uploadVideo", (req, res) => {
 
 });
 
+app.post("/removeMedia/:title", (req, res) => {
+
+  const title = req.params.title
+  const updatedTitle = title.substr(1, title.length)
+  //@ts-ignore
+  const pathVideo = __dirname + '/public/uploads/videos/' + updatedTitle + ".mp4"
+
+  //@ts-ignore
+  const pathThumbnail = __dirname + '/public/uploads/thumbnails/' + updatedTitle + ".jpg"
+
+  try {
+    fs.unlinkSync(pathVideo)
+    fs.unlinkSync(pathThumbnail)
+    res.send({"message": "Deleted the files"})
+  } 
+  
+  catch(err) {
+    console.error(err)
+  }
+
+});
+
 app.post("/uploadThumbnail", (req, res) => {
 
   //@ts-ignore
