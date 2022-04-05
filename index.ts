@@ -180,17 +180,25 @@ async function getUserFromToken (token: string) {
   const user = await prisma.user.findUnique({ where: { id: decodedData.id }, 
     
     include: {
+
       logins: true,
       avatar: true,
       videos: true,
       comments: true, 
+
       videosLiked: { include: { video: true } }, 
       videosDisliked: { include: { video: true } }, 
+
       commentsLiked: { include: { comment: true } },
       commentsDisliked: { include: { comment: true } },
+
+      //@ts-ignore
+      savedVideos: { include: { video: true } },
+
       //@ts-ignore
       subscribedBy: { include: { subscriber: true } },
       subscribing: { include: { subscribing: true } },
+      
     }
 
   })
@@ -211,16 +219,25 @@ app.post('/login', async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email: email }, 
       
       include: {
+
         logins: true,
         avatar: true,
         videos: true,
         comments: true, 
+
         videosLiked: { include: { video: true } }, 
         commentsLiked: { include: { comment: true } },
+
+        //@ts-ignore
+        savedVideos: { include: { video: true } },
+
         //@ts-ignore
         subscribedBy: { include: { subscriber: true } },
         subscribing: { include: { subscribing: true } },
-      } })
+
+      }
+
+    })
     
     // @ts-ignore
     const passwordMatches = bcrypt.compareSync(password, user.password)
