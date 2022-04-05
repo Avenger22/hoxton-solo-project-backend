@@ -2307,8 +2307,10 @@ app.post('/commentLikes', async (req, res) => {
   try {
 
     const user = await getUserFromToken(token)
- 
-    if (user) {
+    //@ts-ignore
+    const matchCommentLike = await prisma.commentLike.findFirst({where: { userId: user.id, commentId: commentId} })
+    
+    if (user && matchCommentLike === undefined || matchCommentLike === null) {
 
       try {
 
@@ -2531,8 +2533,10 @@ app.post('/commentDislikes', async (req, res) => {
   try {
 
     const user = await getUserFromToken(token)
- 
-    if (user) {
+    //@ts-ignore
+    const matchCommentDislike = await prisma.commentDislike.findFirst({where: { userId: user.id, commentId: commentId} })
+    
+    if (user && matchCommentDislike === undefined || matchCommentDislike === null) {
 
       try {
 
@@ -2755,11 +2759,10 @@ app.post('/videoLikes', async (req, res) => {
   try {
 
     const user = await getUserFromToken(token)
-
     //@ts-ignore
-    // const videoLikeCheck = await prisma.videoLike.findFirst({ where: { userId: user.id }} )
+    const matchVideoLike = await prisma.videoLike.findFirst({where: { userId: user.id, videoId: videoId} })
     
-    if (user) {
+    if (user && matchVideoLike === undefined || matchVideoLike === null) {
 
       try {
 
@@ -2982,11 +2985,10 @@ app.post('/videoLikes', async (req, res) => {
   try {
 
     const user = await getUserFromToken(token)
-
     //@ts-ignore
-    // const videoLikeCheck = await prisma.videoLike.findFirst({ where: { userId: user.id }} )
+    const matchVideoDislike = await prisma.videoDislike.findFirst({where: { userId: user.id, videoId: videoId} })
     
-    if (user) {
+    if (user && matchVideoDislike === undefined || matchVideoDislike === null) {
 
       try {
 
@@ -3742,6 +3744,7 @@ app.get('/videosSaved/:id', async (req, res) => {
     //@ts-ignore
     const videoSaved = await prisma.savedVideo.findFirst({
 
+      //@ts-ignore
       where: { id: idParam },
 
       include: 
@@ -3783,8 +3786,10 @@ app.post('/videosSaved', async (req, res) => {
   try {
 
     const user = await getUserFromToken(token)
+    //@ts-ignore
+    const matchVideoSaved = await prisma.savedVideo.findFirst({where: { userId: user.id, videoId: videoId} })
     
-    if (user) {
+    if (user && matchVideoSaved === undefined || matchVideoSaved === null) {
 
       try {
 
@@ -3794,6 +3799,7 @@ app.post('/videosSaved', async (req, res) => {
         //@ts-ignore
         const createdVideoSavedUser= await prisma.user.findFirst({
 
+          //@ts-ignore
           where: { id: user.id },
 
           include: { 
@@ -3861,6 +3867,7 @@ app.delete('/videosSaved/:id', async (req, res) => {
 
       //@ts-ignore
       await prisma.savedVideo.delete({ 
+        //@ts-ignore
         where: { id: Number(idParam) }
       })
 
@@ -3881,7 +3888,7 @@ app.delete('/videosSaved/:id', async (req, res) => {
           videosDisliked:  { include: { video: true} },
   
           //@ts-ignore
-          savedVideos: { include: { video: true } },
+          savedVideos: { include: { video: true, user: true } },
   
           subscribedBy: { include: { subscribing: {include: { avatar: true } } } },
           subscribing:  { include: { subscriber: {include: {avatar: true} } } }
@@ -3933,6 +3940,7 @@ app.patch('/videosSaved/:id', async (req, res) => {
         await prisma.savedVideo.update({
 
           where: {
+            //@ts-ignore
             id: user.id,
           },
 
