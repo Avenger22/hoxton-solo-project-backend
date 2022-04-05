@@ -193,7 +193,7 @@ async function getUserFromToken (token: string) {
       commentsDisliked: { include: { comment: true } },
 
       //@ts-ignore
-      savedVideos: { include: { video: true } },
+      savedVideos: { include: { video: { include: { userWhoCreatedIt: true } }, user: true } },
 
       //@ts-ignore
       subscribedBy: { include: { subscriber: true } },
@@ -229,7 +229,7 @@ app.post('/login', async (req, res) => {
         commentsLiked: { include: { comment: true } },
 
         //@ts-ignore
-        savedVideos: { include: { video: true } },
+        savedVideos: { include: { video: { include: { userWhoCreatedIt: true } }, user: true } },
 
         //@ts-ignore
         subscribedBy: { include: { subscriber: true } },
@@ -298,7 +298,7 @@ app.get('/users', async (req, res) => {
         videosDisliked: { include: {video: true} },
 
         //@ts-ignore
-        savedVideos: { include: { video: true } },
+        savedVideos: { include: { video: true, user: true } },
 
         subscribedBy: { include: { subscribing: {include: { avatar: true } } } },
         subscribing:  { include: { subscriber: {include: {avatar: true} } } }
@@ -333,7 +333,7 @@ app.get('/users/:id', async (req, res) => {
         commentsDisliked: { include: {comment: true} },
 
         //@ts-ignore
-        savedVideos: { include: { video: true } },
+        savedVideos: { include: { video: true, user: true } },
 
         videosLiked:  { include: { video: true} },
         videosDisliked: { include: {video: true} },
@@ -427,7 +427,7 @@ app.get('/users/:id', async (req, res) => {
         videosDisliked:  { include: { video: true} },
 
         //@ts-ignore
-        savedVideos: { include: { video: true } },
+        savedVideos: { include: { video: true, user: true } },
 
         subscribedBy: { include: { subscribing: {include: { avatar: true } } } },
         subscribing:  { include: { subscriber: {include: {avatar: true} } } }
@@ -510,7 +510,7 @@ app.post('/users', async (req, res) => {
             commentsLiked: { include: {comment: true} },
             commentsDisliked: { include: {comment: true} },
             //@ts-ignore
-            savedVideos: { include: { video: true } },
+            savedVideos: { include: { video: true, user: true } },
             videosLiked:  { include: { video: true} },
             videosDisliked:  { include: { video: true} },
             subscribedBy: { include: { subscriber: true } },
@@ -569,7 +569,7 @@ app.delete('/users/:id', async (req, res) => {
           commentsLiked: { include: {comment: true} },
           commentsDisliked: { include: {comment: true} },
           //@ts-ignore
-          savedVideos: { include: { video: true } },
+          savedVideos: { include: { video: true, user: true } },
           videosLiked:  { include: { video: true} },
           videosDisliked:  { include: { video: true} },
           subscribedBy: { include: { subscriber: true } },
@@ -661,7 +661,7 @@ app.patch('/users/:id', async (req, res) => {
             commentsLiked: { include: {comment: true} },
             commentsDisliked: { include: {comment: true} },
             //@ts-ignore
-            savedVideos: { include: { video: true } },
+            savedVideos: { include: { video: true, user: true } },
 
             videosLiked:  { include: { video: true} },
             videosDisliked:  { include: { video: true} },
@@ -3717,7 +3717,7 @@ app.get('/videosSaved', async (req, res) => {
   try {
 
     //@ts-ignore
-    const videosSaved = await prisma.videoSaved.findMany({ 
+    const videosSaved = await prisma.savedVideo.findMany({ 
       include: 
         { video: true, user: true } 
       })
@@ -3740,7 +3740,7 @@ app.get('/videosSaved/:id', async (req, res) => {
   try {
 
     //@ts-ignore
-    const videoSaved = await prisma.videoSaved.findFirst({
+    const videoSaved = await prisma.savedVideo.findFirst({
 
       where: { id: idParam },
 
@@ -3789,7 +3789,7 @@ app.post('/videosSaved', async (req, res) => {
       try {
 
         //@ts-ignore
-        await prisma.videoSaved.create({data: newVideoSaved})
+        await prisma.savedVideo.create({data: newVideoSaved})
         
         //@ts-ignore
         const createdVideoSavedUser= await prisma.user.findFirst({
@@ -3797,7 +3797,9 @@ app.post('/videosSaved', async (req, res) => {
           where: { id: user.id },
 
           include: { 
-            videos: true, logins: true, 
+
+            videos: true, 
+            logins: true, 
             comments:true, 
             avatar: true, 
             
@@ -3812,6 +3814,7 @@ app.post('/videosSaved', async (req, res) => {
     
             subscribedBy: { include: { subscribing: {include: { avatar: true } } } },
             subscribing:  { include: { subscriber: {include: {avatar: true} } } }
+
           }
 
         })
@@ -3852,12 +3855,12 @@ app.delete('/videosSaved/:id', async (req, res) => {
     const user = await getUserFromToken(token)
 
     //@ts-ignore
-    await prisma.videoHashtag.findUnique( { where: {id: Number(idParam)} } )
+    await prisma.savedVideo.findUnique( { where: {id: Number(idParam)} } )
 
     if (user) {
 
       //@ts-ignore
-      await prisma.videoHashtag.delete({ 
+      await prisma.savedVideo.delete({ 
         where: { id: Number(idParam) }
       })
 
@@ -3927,7 +3930,7 @@ app.patch('/videosSaved/:id', async (req, res) => {
       try {
 
         //@ts-ignore
-        await prisma.videoSaved.update({
+        await prisma.savedVideo.update({
 
           where: {
             id: user.id,
