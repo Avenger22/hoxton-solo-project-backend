@@ -3711,6 +3711,280 @@ app.get('/hashtags/:id', async (req, res) => {
 })
 // #endregion
 
+// #region "videosSaved endpoints"
+app.get('/videosSaved', async (req, res) => {
+
+  try {
+
+    //@ts-ignore
+    const videosSaved = await prisma.videoSaved.findMany({ 
+      include: 
+        { video: true, user: true } 
+      })
+
+    res.send(videosSaved)
+
+  }
+
+  catch(error) {
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.get('/videosSaved/:id', async (req, res) => {
+
+  const idParam = Number(req.params.id)
+
+  try {
+
+    //@ts-ignore
+    const videoSaved = await prisma.videoSaved.findFirst({
+
+      where: { id: idParam },
+
+      include: 
+        { video: true, user: true } 
+      })
+  
+
+    if (videoSaved) {
+      res.send(videoSaved)
+    } 
+    
+    else {
+      res.status(404).send({ error: 'videoSaved not found.' })
+    }
+
+  }
+
+  catch(error){
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.post('/videosSaved', async (req, res) => {
+    
+  const token = req.headers.authorization || ''
+  
+  const { 
+    videoId, 
+    userId  
+  } = req.body
+  
+  const newVideoSaved = { 
+    videoId: videoId,
+    userId: userId
+  }
+
+  try {
+
+    const user = await getUserFromToken(token)
+    
+    if (user) {
+
+      try {
+
+        //@ts-ignore
+        await prisma.videoSaved.create({data: newVideoSaved})
+        
+        //@ts-ignore
+        const createdVideoSavedUser= await prisma.user.findFirst({
+
+          where: { id: user.id },
+
+          include: { 
+            videos: true, logins: true, 
+            comments:true, 
+            avatar: true, 
+            
+            commentsLiked: { include: {comment: true} },
+            commentsDisliked: { include: {comment: true} },
+            
+            videosLiked:  { include: { video: true} },
+            videosDisliked:  { include: { video: true} },
+    
+            //@ts-ignore
+            savedVideos: { include: { video: true } },
+    
+            subscribedBy: { include: { subscribing: {include: { avatar: true } } } },
+            subscribing:  { include: { subscriber: {include: {avatar: true} } } }
+          }
+
+        })
+
+        res.send(createdVideoSavedUser)
+        
+      }
+
+      catch(error) {
+        //@ts-ignore
+        res.status(400).send(`<prev>${error.message}</prev>`)
+      }
+
+    }
+
+    else {
+      res.status(404).send({ error: 'user is not authorized to do this' })
+    }
+
+
+  }
+
+  catch(error) {
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.delete('/videosSaved/:id', async (req, res) => {
+
+  const token = req.headers.authorization || ''
+  const idParam = req.params.id
+  
+  try {
+
+    // check that they are signed in
+    const user = await getUserFromToken(token)
+
+    //@ts-ignore
+    await prisma.videoHashtag.findUnique( { where: {id: Number(idParam)} } )
+
+    if (user) {
+
+      //@ts-ignore
+      await prisma.videoHashtag.delete({ 
+        where: { id: Number(idParam) }
+      })
+
+      //@ts-ignore
+      const createdVideoSavedUser= await prisma.user.findFirst({
+
+        where: { id: user.id },
+
+        include: { 
+          videos: true, logins: true, 
+          comments:true, 
+          avatar: true, 
+          
+          commentsLiked: { include: {comment: true} },
+          commentsDisliked: { include: {comment: true} },
+          
+          videosLiked:  { include: { video: true} },
+          videosDisliked:  { include: { video: true} },
+  
+          //@ts-ignore
+          savedVideos: { include: { video: true } },
+  
+          subscribedBy: { include: { subscribing: {include: { avatar: true } } } },
+          subscribing:  { include: { subscriber: {include: {avatar: true} } } }
+        }
+
+      })
+
+      res.send(createdVideoSavedUser)
+
+    }
+
+    else {
+      res.status(404).send({ error: 'videoSaved not found, or the videoSaved doesnt belong to that user to be deleted.' })
+    }
+
+  }
+
+  catch(error) {
+    //@ts-ignore
+    res.status(400).send(`<prev>${error.message}</prev>`)
+  }
+
+})
+
+app.patch('/videosSaved/:id', async (req, res) => {
+
+  const token = req.headers.authorization || ''
+  const idParam = Number(req.params.id);
+  
+  const { 
+    videoId, 
+    userId  
+  } = req.body
+  
+  const updatedVideoSaved = { 
+    videoId: videoId,
+    userId: userId
+  }
+
+  try {
+
+    const user = await getUserFromToken(token)
+         
+    if (user) {
+
+      try {
+
+        //@ts-ignore
+        await prisma.videoSaved.update({
+
+          where: {
+            id: user.id,
+          },
+
+          data: updatedVideoSaved
+
+        })
+
+        //@ts-ignore
+        const createdVideoSavedUser= await prisma.user.findFirst({
+
+          where: { id: user.id },
+
+          include: { 
+            videos: true, logins: true, 
+            comments:true, 
+            avatar: true, 
+            
+            commentsLiked: { include: {comment: true} },
+            commentsDisliked: { include: {comment: true} },
+            
+            videosLiked:  { include: { video: true} },
+            videosDisliked:  { include: { video: true} },
+    
+            //@ts-ignore
+            savedVideos: { include: { video: true } },
+    
+            subscribedBy: { include: { subscribing: {include: { avatar: true } } } },
+            subscribing:  { include: { subscriber: {include: {avatar: true} } } }
+          }
+
+        })
+
+        res.send(createdVideoSavedUser)
+
+      }
+
+      catch(error) {
+        res.status(404).send({message: error})
+      }
+
+    }
+
+    else {
+      throw Error('Error!')
+    }
+
+  }  
+  
+  catch(error) {
+    res.status(404).send({message: error})
+  }
+
+})
+// #endregion
+
 // #endregion
 
 
