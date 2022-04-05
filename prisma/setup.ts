@@ -194,12 +194,32 @@ const subscribers = [
 const categories = [
   {
     id: 1,
-    name: "Football"
+    name: "All"
   },
   {
     id: 2,
+    name: "Music"
+  },
+  {
+    id: 3,
+    name: "Movies"
+  },
+  {
+    id: 4,
+    name: "Anime"
+  },
+  {
+    id: 5,
+    name: "Basketball"
+  },
+  {
+    id: 6,
     name: "Fighting"
-  } 
+  }, 
+  {
+    id: 7,
+    name: "Trailers"
+  }, 
 ]
 
 const videoHashtags = [
@@ -217,6 +237,21 @@ const videoHashtags = [
     id: 3,
     videoId: 3,
     hashtagId: 2
+  },
+  {
+    id: 4,
+    videoId: 3,
+    hashtagId: 3
+  },
+  {
+    id: 5,
+    videoId: 3,
+    hashtagId: 4
+  },
+  {
+    id: 6,
+    videoId: 2,
+    hashtagId: 4
   }
 ]
 
@@ -228,6 +263,42 @@ const hashtags = [
   {
     id: 2,
     name: "funny"
+  },
+  {
+    id: 3,
+    name: "general"
+  },
+  {
+    id: 4,
+    name: "breathtaking"
+  }
+]
+
+const savedVideos = [
+  {
+    id: 1,
+    userId: 1,
+    videoId: 1
+  },
+  {
+    id: 2,
+    userId: 1,
+    videoId: 2
+  },
+  {
+    id: 3,
+    userId: 1,
+    videoId: 3
+  },
+  {
+    id: 4,
+    userId: 2,
+    videoId: 3
+  },
+  {
+    id: 5,
+    userId: 2,
+    videoId: 1
   }
 ]
 
@@ -245,6 +316,8 @@ async function createStuff () {
 
   await prisma.videoLike.deleteMany()
   await prisma.videoDislike.deleteMany()
+  //@ts-ignore
+  await prisma.savedVideo.deleteMany()
 
   await prisma.login.deleteMany()
 
@@ -309,6 +382,11 @@ async function createStuff () {
   for (const subscribe of subscribers) {
     //@ts-ignore
     await prisma.subscribe.create({ data: subscribe })
+  }
+
+  for (const savedVideo of savedVideos) {
+    //@ts-ignore
+    await prisma.savedVideo.create({ data: savedVideo })
   }
 
 }
