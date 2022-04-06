@@ -893,7 +893,6 @@ app.get('/videos/:id', async (req, res) => {
           comments: { include: { userWhoCreatedIt: true, video: true } }, 
           category: true,
           hashtags: { include: { hashtag: true } },
-          //@ts-ignore
           savedByUsers: { include: { user: true } },
           usersWhoLikedIt: { 
             include: { 
@@ -1394,7 +1393,7 @@ app.get('/comments', async (req, res) => {
       let countLikesInside = 0
 
       //@ts-ignore
-      for (const user of comment.usersWhoLikedIt) {
+      for (const user of comment?.usersWhoLikedIt) {
         countLikesInside++
       }
 
@@ -1404,12 +1403,13 @@ app.get('/comments', async (req, res) => {
 
     for (let i = 0; i < comments.length; i++) {
 
+      console.log(comments[i])
+
       await prisma.comment.update({
 
         where: { id: comments[i].id },
 
         data: {
-          //@ts-ignore
           countLikesInside: countLikesInsideArray[i]
         },
 
@@ -1432,7 +1432,23 @@ app.get('/comments', async (req, res) => {
               subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
               subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
             }
+          },
+
+          usersWhoDislikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
+              subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
+            }
           }
+
         }
 
       })
@@ -1461,7 +1477,23 @@ app.get('/comments', async (req, res) => {
               subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
               subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
             }
+          },
+
+          usersWhoDislikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
+              subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
+            }
           }
+
       }
 
     })
@@ -1516,7 +1548,7 @@ app.get('/comments/:id', async (req, res) => {
     let countLikesInside = 0
 
     //@ts-ignore
-    for (const user of comment.usersWhoLikedIt) {
+    for (const user of comment?.usersWhoLikedIt) {
       countLikesInside++
     }
 
@@ -1548,7 +1580,23 @@ app.get('/comments/:id', async (req, res) => {
             subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
             subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
           }
+        },
+
+        usersWhoDislikedIt: { 
+          include: { 
+          user: {
+          include: { 
+            videos: true, 
+            logins: true, 
+            comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+            avatar: { include: { user: true } }, 
+            commentsLiked: { include: {comment: true} },
+            videosLiked:  { include: { video: true} },
+            subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
+            subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
+          }
         }
+
       }
 
     })
