@@ -1362,12 +1362,29 @@ app.get('/comments', async (req, res) => {
   try {
 
     const comments = await prisma.comment.findMany({ 
-      include: 
-        { 
-          video: true, 
-          userWhoCreatedIt: true, 
-          usersWhoLikedIt: { include: { user:true } } 
+
+        include: { 
+
+          userWhoCreatedIt: { include: { avatar: true } }, 
+
+          video: { include: { userWhoCreatedIt: true } }, 
+
+          usersWhoLikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
+              subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
+            }
+          }
         } 
+
       })
 
     let countLikesInsideArray = []
@@ -1397,9 +1414,25 @@ app.get('/comments', async (req, res) => {
         },
 
         include: { 
-          video: true, 
-          userWhoCreatedIt: true, 
-          usersWhoLikedIt: { include: { user:true } }
+
+          userWhoCreatedIt: { include: { avatar: true } }, 
+
+          video: { include: { userWhoCreatedIt: true } }, 
+
+          usersWhoLikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
+              subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
+            }
+          }
         }
 
       })
@@ -1452,13 +1485,31 @@ app.get('/comments/:id', async (req, res) => {
 
 
     const comment = await prisma.comment.findFirst({
+
       where: { id: idParam },
-      include: 
-        { 
-          video: true, 
-          userWhoCreatedIt: true, 
-          usersWhoLikedIt: { include: { user:true } } 
+
+        include: { 
+
+          userWhoCreatedIt: { include: { avatar: true } }, 
+
+          video: { include: { userWhoCreatedIt: true } }, 
+
+          usersWhoLikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
+              subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
+            }
+          }
         } 
+
       })
   
 
@@ -1478,27 +1529,26 @@ app.get('/comments/:id', async (req, res) => {
         countLikesInside: countLikesInside
       },
 
-      include: 
-        { 
+      include: { 
 
-          userWhoCreatedIt: { include: { avatar: true } }, 
+        userWhoCreatedIt: { include: { avatar: true } }, 
 
-          video: { include: { userWhoCreatedIt: true } }, 
+        video: { include: { userWhoCreatedIt: true } }, 
 
-          usersWhoLikedIt: { 
-            include: { 
-            user: {
-            include: { 
-              videos: true, 
-              logins: true, 
-              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
-              avatar: { include: { user: true } }, 
-              commentsLiked: { include: {comment: true} },
-              videosLiked:  { include: { video: true} },
-              subscribedBy: { include: { subscribing: true } },
-              subscribing:  { include: { subscriber: true } } } } 
-            }
+        usersWhoLikedIt: { 
+          include: { 
+          user: {
+          include: { 
+            videos: true, 
+            logins: true, 
+            comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+            avatar: { include: { user: true } }, 
+            commentsLiked: { include: {comment: true} },
+            videosLiked:  { include: { video: true} },
+            subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
+            subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
           }
+        }
       }
 
     })
@@ -1569,26 +1619,47 @@ app.post('/comments', async (req, res) => {
           where: { id: videoId },
 
           include: 
-            { 
-    
-              userWhoCreatedIt: { include: { avatar: true } }, 
-    
-              comments: { include: { userWhoCreatedIt: true, video: true } }, 
-    
-              usersWhoLikedIt: { 
-                include: { 
-                user: {
-                include: { 
-                  videos: true, 
-                  logins: true, 
-                  comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
-                  avatar: { include: { user: true } }, 
-                  commentsLiked: { include: {comment: true} },
-                  videosLiked:  { include: { video: true} },
-                  subscribedBy: { include: { subscribing: true } },
-                  subscribing:  { include: { subscriber: true } } } }, video: true 
-                }
+          { 
+  
+            userWhoCreatedIt: { include: { avatar: true } }, 
+  
+            comments: { include: { userWhoCreatedIt: true, video: true } }, 
+            category: true,
+            hashtags: { include: { hashtag: true } },
+            //@ts-ignore
+            savedByUsers: { include: { user: true } },
+            usersWhoLikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
               }
+            },
+            usersWhoDislikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
+              }
+            }
           }
     
         })
@@ -1646,26 +1717,47 @@ app.delete('/comments/:id', async (req, res) => {
         where: { id: videoId },
 
         include: 
-          { 
-  
-            userWhoCreatedIt: { include: { avatar: true } }, 
-  
-            comments: { include: { userWhoCreatedIt: true, video: true } }, 
-  
-            usersWhoLikedIt: { 
-              include: { 
-              user: {
-              include: { 
-                videos: true, 
-                logins: true, 
-                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
-                avatar: { include: { user: true } }, 
-                commentsLiked: { include: {comment: true} },
-                videosLiked:  { include: { video: true} },
-                subscribedBy: { include: { subscribing: true } },
-                subscribing:  { include: { subscriber: true } } } }, video: true 
-              }
+        { 
+
+          userWhoCreatedIt: { include: { avatar: true } }, 
+
+          comments: { include: { userWhoCreatedIt: true, video: true } }, 
+          category: true,
+          hashtags: { include: { hashtag: true } },
+          //@ts-ignore
+          savedByUsers: { include: { user: true } },
+          usersWhoLikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
             }
+          },
+          usersWhoDislikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          }
         }
   
       })
@@ -2289,6 +2381,7 @@ app.get('/commentLikes/:id', async (req, res) => {
 app.post('/commentLikes', async (req, res) => {
     
   const token = req.headers.authorization || ''
+  const videoId = req.headers.videoId || ''
   
   const { 
     createdAt, 
@@ -2314,16 +2407,58 @@ app.post('/commentLikes', async (req, res) => {
 
       try {
 
-        const createdCommentLike = await prisma.commentLike.create({data: newCommentLike})
+        await prisma.commentLike.create({data: newCommentLike})
         
-        const createdCommentLikeFull = await prisma.commentLike.findFirst({
-          where: { id: createdCommentLike.id },
-          include: {
-            user: true, comment: true
+        const videoFull = await prisma.video.findFirst({
+
+          where: { id: Number(videoId) },
+
+          include: { 
+
+            userWhoCreatedIt: { include: { avatar: true } }, 
+
+            comments: { include: { userWhoCreatedIt: true, video: true } }, 
+            category: true,
+            hashtags: { include: { hashtag: true } },
+            //@ts-ignore
+            savedByUsers: { include: { user: true } },
+            usersWhoLikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
+              }
+            },
+            usersWhoDislikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
+              }
+            }
           }
+
         })
 
-        res.send(createdCommentLikeFull)
+        res.send(videoFull)
 
       }
 
@@ -2351,6 +2486,7 @@ app.post('/commentLikes', async (req, res) => {
 app.delete('/commentLikes/:id', async (req, res) => {
 
   const token = req.headers.authorization || ''
+  const videoId = req.headers.videoId || ''
   const idParam = req.params.id
   
   try {
@@ -2368,10 +2504,56 @@ app.delete('/commentLikes/:id', async (req, res) => {
         where: { id: Number(idParam) }
       })
 
-      const commentLikes = await prisma.commentLike.findMany( { where: { userId: user.id } } )
+      const videoFull = await prisma.video.findFirst({
 
-      // res.send(orderDeleted)
-      res.send(commentLikes)
+        where: { id: Number(videoId) },
+
+        include: { 
+
+          userWhoCreatedIt: { include: { avatar: true } }, 
+
+          comments: { include: { userWhoCreatedIt: true, video: true } }, 
+          category: true,
+          hashtags: { include: { hashtag: true } },
+          //@ts-ignore
+          savedByUsers: { include: { user: true } },
+          usersWhoLikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          },
+          usersWhoDislikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          }
+        }
+
+      })
+
+      res.send(videoFull)
 
     }
 
@@ -2515,6 +2697,7 @@ app.get('/commentDislikes/:id', async (req, res) => {
 app.post('/commentDislikes', async (req, res) => {
     
   const token = req.headers.authorization || ''
+  const videoId = req.headers.videoId || ''
   
   const { 
     createdAt, 
@@ -2540,16 +2723,58 @@ app.post('/commentDislikes', async (req, res) => {
 
       try {
 
-        const createdCommentDislike = await prisma.commentDislike.create({data: newCommentDislike})
+        await prisma.commentDislike.create({data: newCommentDislike})
         
-        const createdCommentDislikeFull = await prisma.commentDislike.findFirst({
-          where: { id: createdCommentDislike.id },
-          include: {
-            user: true, comment: true
-          }
+        const videoFull = await prisma.video.findFirst({
+
+          where: { id: Number(videoId) },
+
+          include: { 
+
+            userWhoCreatedIt: { include: { avatar: true } }, 
+
+            comments: { include: { userWhoCreatedIt: true, video: true } }, 
+            category: true,
+            hashtags: { include: { hashtag: true } },
+            //@ts-ignore
+            savedByUsers: { include: { user: true } },
+            usersWhoLikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
+              }
+            },
+            usersWhoDislikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
+              }
+            }
+        }
+
         })
 
-        res.send(createdCommentDislikeFull)
+        res.send(videoFull)
 
       }
 
@@ -2577,6 +2802,7 @@ app.post('/commentDislikes', async (req, res) => {
 app.delete('/commentDislikes/:id', async (req, res) => {
 
   const token = req.headers.authorization || ''
+  const videoId = req.headers.videoId || ''
   const idParam = req.params.id
   
   try {
@@ -2594,10 +2820,56 @@ app.delete('/commentDislikes/:id', async (req, res) => {
         where: { id: Number(idParam) }
       })
 
-      const commentDislikes = await prisma.commentDislike.findMany( { where: { userId: user.id } } )
+      const videoFull = await prisma.video.findFirst({
 
-      // res.send(orderDeleted)
-      res.send(commentDislikes)
+        where: { id: Number(videoId) },
+
+        include: { 
+
+          userWhoCreatedIt: { include: { avatar: true } }, 
+
+          comments: { include: { userWhoCreatedIt: true, video: true } }, 
+          category: true,
+          hashtags: { include: { hashtag: true } },
+          //@ts-ignore
+          savedByUsers: { include: { user: true } },
+          usersWhoLikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          },
+          usersWhoDislikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          }
+      }
+
+      })
+
+      res.send(videoFull)
 
     }
 
@@ -2766,16 +3038,58 @@ app.post('/videoLikes', async (req, res) => {
 
       try {
 
-        const createdVideoLike = await prisma.videoLike.create({data: newVideoLike})
+        await prisma.videoLike.create({data: newVideoLike})
         
-        const createdVideoLikeFull = await prisma.videoLike.findFirst({
-          where: { id: createdVideoLike.id },
-          include: {
-            user: true, video: true
-          }
+        const videoFull = await prisma.video.findFirst({
+
+          where: { id: Number(videoId) },
+
+          include: { 
+
+            userWhoCreatedIt: { include: { avatar: true } }, 
+
+            comments: { include: { userWhoCreatedIt: true, video: true } }, 
+            category: true,
+            hashtags: { include: { hashtag: true } },
+            //@ts-ignore
+            savedByUsers: { include: { user: true } },
+            usersWhoLikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
+              }
+            },
+            usersWhoDislikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
+              }
+            }
+        }
+
         })
 
-        res.send(createdVideoLikeFull)
+        res.send(videoFull)
         
       }
 
@@ -2803,6 +3117,7 @@ app.post('/videoLikes', async (req, res) => {
 app.delete('/videoLikes/:id', async (req, res) => {
 
   const token = req.headers.authorization || ''
+  const videoId = req.headers.videoId || ''
   const idParam = req.params.id
   
   try {
@@ -2820,10 +3135,56 @@ app.delete('/videoLikes/:id', async (req, res) => {
         where: { id: Number(idParam) }
       })
 
-      const videoLikes = await prisma.videoLike.findMany( { where: { userId: user.id } } )
+      const videoFull = await prisma.video.findFirst({
 
-      // res.send(orderDeleted)
-      res.send(videoLikes)
+        where: { id: Number(videoId) },
+
+        include: { 
+
+          userWhoCreatedIt: { include: { avatar: true } }, 
+
+          comments: { include: { userWhoCreatedIt: true, video: true } }, 
+          category: true,
+          hashtags: { include: { hashtag: true } },
+          //@ts-ignore
+          savedByUsers: { include: { user: true } },
+          usersWhoLikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          },
+          usersWhoDislikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          }
+      }
+
+      })
+
+      res.send(videoFull)
 
     }
 
@@ -2992,16 +3353,58 @@ app.post('/videoLikes', async (req, res) => {
 
       try {
 
-        const createdVideoDislike = await prisma.videoLike.create({data: newVideoDislike})
+        await prisma.videoLike.create({data: newVideoDislike})
         
-        const createdVideoDislikeFull = await prisma.videoDislike.findFirst({
-          where: { id: createdVideoDislike.id },
-          include: {
-            user: true, video: true
+        const videoFull = await prisma.video.findFirst({
+
+          where: { id: Number(videoId) },
+
+          include: { 
+
+            userWhoCreatedIt: { include: { avatar: true } }, 
+
+            comments: { include: { userWhoCreatedIt: true, video: true } }, 
+            category: true,
+            hashtags: { include: { hashtag: true } },
+            //@ts-ignore
+            savedByUsers: { include: { user: true } },
+            usersWhoLikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
+              }
+            },
+            usersWhoDislikedIt: { 
+              include: { 
+              user: {
+              include: { 
+                videos: true, 
+                logins: true, 
+                comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+                avatar: { include: { user: true } }, 
+                commentsLiked: { include: {comment: true} },
+                commentsDisliked: { include: {comment: true} },
+                videosLiked:  { include: { video: true} },
+                videosDisliked:  { include: { video: true} },
+                subscribedBy: { include: { subscribing: true } },
+                subscribing:  { include: { subscriber: true } } } }, video: true 
+              }
+            }
           }
+
         })
 
-        res.send(createdVideoDislikeFull)
+        res.send(videoFull)
         
       }
 
@@ -3029,6 +3432,7 @@ app.post('/videoLikes', async (req, res) => {
 app.delete('/videoDislikes/:id', async (req, res) => {
 
   const token = req.headers.authorization || ''
+  const videoId = req.headers.videoId || ''
   const idParam = req.params.id
   
   try {
@@ -3046,10 +3450,56 @@ app.delete('/videoDislikes/:id', async (req, res) => {
         where: { id: Number(idParam) }
       })
 
-      const videoDislikes = await prisma.videoDislike.findMany( { where: { userId: user.id } } )
+      const videoFull = await prisma.video.findFirst({
 
-      // res.send(orderDeleted)
-      res.send(videoDislikes)
+        where: { id: Number(videoId) },
+
+        include: { 
+
+          userWhoCreatedIt: { include: { avatar: true } }, 
+
+          comments: { include: { userWhoCreatedIt: true, video: true } }, 
+          category: true,
+          hashtags: { include: { hashtag: true } },
+          //@ts-ignore
+          savedByUsers: { include: { user: true } },
+          usersWhoLikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          },
+          usersWhoDislikedIt: { 
+            include: { 
+            user: {
+            include: { 
+              videos: true, 
+              logins: true, 
+              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+              avatar: { include: { user: true } }, 
+              commentsLiked: { include: {comment: true} },
+              commentsDisliked: { include: {comment: true} },
+              videosLiked:  { include: { video: true} },
+              videosDisliked:  { include: { video: true} },
+              subscribedBy: { include: { subscribing: true } },
+              subscribing:  { include: { subscriber: true } } } }, video: true 
+            }
+          }
+        }
+
+      })
+
+      res.send(videoFull)
 
     }
 
