@@ -323,7 +323,9 @@ app.get('/users/:id', async (req, res) => {
   try {
 
     const user = await prisma.user.findFirst({
+
       where: { id: idParam },
+
       include: { 
         videos: true, logins: true, 
         comments:true, 
@@ -341,102 +343,11 @@ app.get('/users/:id', async (req, res) => {
         subscribedBy: { include: { subscribing: true } },
         subscribing:  { include: { subscriber: true } }
       }
-    })
-
-    let countvideosCreated = 0
-    let countCommentsCreated = 0
-    let countCommentsLiked = 0
-    let countCommentsDisliked = 0
-    let countVideosLiked = 0
-    let countVideosDisliked = 0
-    let countSubscribers = 0
-    let countSubscribing = 0
-    let countLogins = 0
-
-    //@ts-ignore
-    for (const video of user.videos) {
-      countvideosCreated++
-    }
-
-    //@ts-ignore
-    for (const comment of user.comments) {
-      countCommentsCreated++
-    }
-
-    //@ts-ignore
-    for (const commentLiked of user.commentsLiked) {
-      countCommentsLiked++
-    }
-
-    //@ts-ignore
-    for (const commentDisliked of user.commentsDisliked) {
-      countCommentsDisliked++
-    }
-
-    //@ts-ignore
-    for (const videoliked of user.videosLiked) {
-      countVideosLiked++
-    }
-
-    //@ts-ignore
-    for (const videoDisliked of user.videosDisliked) {
-      countVideosDisliked++
-    }
-
-    //@ts-ignore
-    for (const subscribing of user.subscribing) {
-      countSubscribing++
-    }
-
-    //@ts-ignore
-    for (const subscriber of user.subscribedBy) {
-      countSubscribers++
-    }
-
-    //@ts-ignore
-    for (const logins of user.logins) {
-      countLogins++
-    }
-
-    const updatedUserWithCounts = await prisma.user.update({
-
-      where: { id: idParam },
-
-      data: {
-        //@ts-ignore
-        countvideosCreated: countvideosCreated,
-        countCommentsCreated: countCommentsCreated,
-        countCommentsLiked: countCommentsLiked,
-        countCommentsDisliked: countCommentsDisliked,
-        countVideosLiked: countVideosLiked,
-        countVideosDisliked: countVideosDisliked,
-        countSubscribers: countSubscribers,
-        countSubscribing: countSubscribing,
-        countLogins: countLogins
-      },
-
-      include: { 
-        videos: true, logins: true, 
-        comments:true, 
-        avatar: true, 
-        
-        commentsLiked: { include: {comment: true} },
-        commentsDisliked: { include: {comment: true} },
-        
-        videosLiked:  { include: { video: true} },
-        videosDisliked:  { include: { video: true} },
-
-        //@ts-ignore
-        savedVideos: { include: { video: true, user: true } },
-
-        subscribedBy: { include: { subscribing: {include: { avatar: true } } } },
-        subscribing:  { include: { subscriber: {include: {avatar: true} } } }
-      }
 
     })
 
     if (user) {
-      res.send(updatedUserWithCounts)
+      res.send(user)
     } 
     
     else {
@@ -722,54 +633,8 @@ app.get('/videos', async (req, res) => {
             }
         }}
 
-      })
-
-    let countCommentsInside = []
-    let countLikesInside = []
-
-    for (const video of videos) {
-      
-      let countCommentsInsideVariable = 0
-      let countLikesInsideVariable = 0
-
-      //@ts-ignore
-      for (const user of video.usersWhoLikedIt) {
-        countLikesInsideVariable++
-      }
-
-      countLikesInside.push(countLikesInsideVariable)
-
-      //@ts-ignore
-      for (const comment of video.comments) {
-        countCommentsInsideVariable++
-      }
-
-      countCommentsInside.push(countCommentsInsideVariable)
-
-    }
-
-    for (let i = 0; i < videos.length; i++) {
-
-      await prisma.video.update({
-
-        where: {id: videos[i].id},
-
-        data: {
-          //@ts-ignore
-          countCommentsInside: countCommentsInside[i],
-          countLikesInside: countLikesInside[i]
-        },
-
-        include: { 
-          userWhoCreatedIt: true, 
-          comments: true, 
-          usersWhoLikedIt: { include: { user:true } }
-        }
-
-      })
-
-    }
-    
+    })
+ 
     let updatedVideoWithCounts = await prisma.video.findMany({
 
       include: 
@@ -839,52 +704,6 @@ app.get('/videos/:id', async (req, res) => {
 
       where: { id: idParam },
 
-      include: { 
-
-          userWhoCreatedIt: true,
-          comments: true,
-          category: true,
-          hashtags: { include: { hashtag: true } },
-          usersWhoLikedIt: { 
-            include: { 
-            user: {
-            include: { 
-              videos: true, 
-              logins: true, 
-              comments: true, 
-              avatar: true, 
-              commentsLiked: { include: {comment: true} },
-              videosLiked:  { include: { video: true} },
-              subscribedBy: { include: { subscribing: true } },
-              subscribing:  { include: { subscriber: true } } } } 
-            }
-        }
-
-      }})
-
-    let countCommentsInside = 0
-    let countLikesInside = 0
-
-    //@ts-ignore
-    for (const user of video.usersWhoLikedIt) {
-      countLikesInside++
-    }
-
-    //@ts-ignore
-    for (const comment of video.comments) {
-      countCommentsInside++
-    }
-
-    const updatedvideoWithCounts = await prisma.video.update({
-
-      where: { id: idParam },
-
-      data: {
-        //@ts-ignore
-        countCommentsInside: countCommentsInside,
-        countLikesInside: countLikesInside
-      },
-
       include: 
         { 
 
@@ -927,12 +746,13 @@ app.get('/videos/:id', async (req, res) => {
               subscribing:  { include: { subscriber: true } } } }, video: true 
             }
           }
-      }
+      }}
 
-    })
+    )
+
 
     if (video) {
-      res.send(updatedvideoWithCounts)
+      res.send(video)
     } 
     
     else {
@@ -943,7 +763,7 @@ app.get('/videos/:id', async (req, res) => {
 
   catch(error){
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -977,6 +797,7 @@ app.post('/videos', async (req, res) => {
       try {
 
         await prisma.video.create({data: newVideo})
+
         let getAllVideos = await prisma.video.findMany({
 
           include: 
@@ -1350,7 +1171,7 @@ app.patch('/videosViews/:id', async (req, res) => {
   }
 
   catch(error) {
-    res.status(404).send({message: error})
+    res.status(404).send({error: error})
   }
 
 })
@@ -1385,94 +1206,15 @@ app.get('/comments', async (req, res) => {
           }
         } 
 
-      })
-
-    let countLikesInsideArray = []
-
-    for (const comment of comments) {
-
-      let countLikesInside = 0
-
-      //@ts-ignore
-      for (const user of comment.usersWhoLikedIt) {
-        countLikesInside++
-      }
-
-      countLikesInsideArray.push(countLikesInside)
-
-    }
-
-    for (let i = 0; i < comments.length; i++) {
-
-      await prisma.comment.update({
-
-        where: { id: comments[i].id },
-
-        data: {
-          //@ts-ignore
-          countLikesInside: countLikesInsideArray[i]
-        },
-
-        include: { 
-
-          userWhoCreatedIt: { include: { avatar: true } }, 
-
-          video: { include: { userWhoCreatedIt: true } }, 
-
-          usersWhoLikedIt: { 
-            include: { 
-            user: {
-            include: { 
-              videos: true, 
-              logins: true, 
-              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
-              avatar: { include: { user: true } }, 
-              commentsLiked: { include: {comment: true} },
-              videosLiked:  { include: { video: true} },
-              subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
-              subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
-            }
-          }
-        }
-
-      })
-
-    }
-
-    const updatedCommentsWithCounts = await prisma.comment.findMany({
-
-      include: 
-        { 
-
-          userWhoCreatedIt: { include: { avatar: true } }, 
-
-          video: { include: { userWhoCreatedIt: true } }, 
-
-          usersWhoLikedIt: { 
-            include: { 
-            user: {
-            include: { 
-              videos: true, 
-              logins: true, 
-              comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
-              avatar: { include: { user: true } }, 
-              commentsLiked: { include: {comment: true} },
-              videosLiked:  { include: { video: true} },
-              subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
-              subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
-            }
-          }
-      }
-
     })
 
-    res.send(updatedCommentsWithCounts)
+    res.send(comments)
 
   }
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -1510,51 +1252,10 @@ app.get('/comments/:id', async (req, res) => {
           }
         } 
 
-      })
-  
-
-    let countLikesInside = 0
-
-    //@ts-ignore
-    for (const user of comment.usersWhoLikedIt) {
-      countLikesInside++
-    }
-
-    const updatedCommentWithCounts = await prisma.comment.update({
-
-      where: { id: idParam },
-
-      data: {
-        //@ts-ignore
-        countLikesInside: countLikesInside
-      },
-
-      include: { 
-
-        userWhoCreatedIt: { include: { avatar: true } }, 
-
-        video: { include: { userWhoCreatedIt: true } }, 
-
-        usersWhoLikedIt: { 
-          include: { 
-          user: {
-          include: { 
-            videos: true, 
-            logins: true, 
-            comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
-            avatar: { include: { user: true } }, 
-            commentsLiked: { include: {comment: true} },
-            videosLiked:  { include: { video: true} },
-            subscribedBy: { include: { subscribing: {include: {avatar: true} } } },
-            subscribing:  { include: { subscriber: {include: {avatar: true} } } } } }
-          }
-        }
-      }
-
     })
-
+  
     if (comment) {
-      res.send(updatedCommentWithCounts)
+      res.send(comment)
     } 
     
     else {
@@ -1565,7 +1266,7 @@ app.get('/comments/:id', async (req, res) => {
 
   catch(error){
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -1595,9 +1296,6 @@ app.post('/comments', async (req, res) => {
   try {
 
     const user = await getUserFromToken(token)
-
-    //@ts-ignore
-    // const commentCheck = await prisma.comment.findFirst({ where: { userId: user.id }} )
     
     if (user) {
 
@@ -1608,9 +1306,9 @@ app.post('/comments', async (req, res) => {
         await prisma.comment.findFirst({
           where: { id: createdComment.id },
           include: { 
-          video: true, 
-          userWhoCreatedIt: true, 
-          usersWhoLikedIt: { include: { user:true } } 
+            video: true, 
+            userWhoCreatedIt: true, 
+            usersWhoLikedIt: { include: { user:true } } 
           } 
         })
 
@@ -1670,7 +1368,7 @@ app.post('/comments', async (req, res) => {
 
       catch(error) {
         //@ts-ignore
-        res.status(400).send(`<prev>${error.message}</prev>`)
+        res.status(400).send({error: error})
       }
 
     }
@@ -1684,7 +1382,7 @@ app.post('/comments', async (req, res) => {
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -1774,8 +1472,7 @@ app.delete('/comments/:id', async (req, res) => {
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
-  }
+    res.status(400).send({error: error})  }
 
 })
 
@@ -1859,7 +1556,7 @@ app.patch('/comments/:id', async (req, res) => {
       }
 
       catch(error) {
-        res.status(404).send({message: error})
+        res.status(400).send({error: error})      
       }
 
     }
@@ -1871,7 +1568,7 @@ app.patch('/comments/:id', async (req, res) => {
   }  
   
   catch(error) {
-    res.status(404).send({message: error})
+    res.status(400).send({error: error})
   }
 
 })
@@ -2464,7 +2161,7 @@ app.post('/commentLikes', async (req, res) => {
 
       catch(error) {
         //@ts-ignore
-        res.status(400).send(`<prev>${error.message}</prev>`)
+        res.status(400).send({error: error})
       }
 
     }
@@ -2478,7 +2175,7 @@ app.post('/commentLikes', async (req, res) => {
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -2565,7 +2262,7 @@ app.delete('/commentLikes/:id', async (req, res) => {
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -2636,7 +2333,7 @@ app.patch('/commentLikes/:id', async (req, res) => {
   }  
   
   catch(error) {
-    res.status(404).send({message: error})
+    res.status(400).send({error: error})
   }
 
 })
@@ -2780,7 +2477,7 @@ app.post('/commentDislikes', async (req, res) => {
 
       catch(error) {
         //@ts-ignore
-        res.status(400).send(`<prev>${error.message}</prev>`)
+        res.status(400).send({error: error})
       }
 
     }
@@ -2789,12 +2486,11 @@ app.post('/commentDislikes', async (req, res) => {
       res.status(404).send({ error: 'user is not authorized for this' })
     }
 
-
   }
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -2881,7 +2577,7 @@ app.delete('/commentDislikes/:id', async (req, res) => {
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -2940,7 +2636,7 @@ app.patch('/commentDislikes/:id', async (req, res) => {
       }
 
       catch(error) {
-        res.status(404).send({message: error})
+        res.status(400).send({error: error})
       }
 
     }
@@ -2952,7 +2648,7 @@ app.patch('/commentDislikes/:id', async (req, res) => {
   }  
   
   catch(error) {
-    res.status(404).send({message: error})
+    res.status(400).send({error: error})
   }
 
 })
@@ -3095,7 +2791,7 @@ app.post('/videoLikes', async (req, res) => {
 
       catch(error) {
         //@ts-ignore
-        res.status(400).send(`<prev>${error.message}</prev>`)
+        res.status(400).send({error: error})
       }
 
     }
@@ -3109,7 +2805,7 @@ app.post('/videoLikes', async (req, res) => {
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -3196,7 +2892,7 @@ app.delete('/videoLikes/:id', async (req, res) => {
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -3410,7 +3106,7 @@ app.post('/videoLikes', async (req, res) => {
 
       catch(error) {
         //@ts-ignore
-        res.status(400).send(`<prev>${error.message}</prev>`)
+        res.status(400).send({error: error})
       }
 
     }
@@ -3424,7 +3120,7 @@ app.post('/videoLikes', async (req, res) => {
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
@@ -3511,7 +3207,7 @@ app.delete('/videoDislikes/:id', async (req, res) => {
 
   catch(error) {
     //@ts-ignore
-    res.status(400).send(`<prev>${error.message}</prev>`)
+    res.status(400).send({error: error})
   }
 
 })
