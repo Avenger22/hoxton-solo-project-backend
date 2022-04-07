@@ -67,7 +67,7 @@ model Video {
   
   src              String
   userId           Int
-  categoryId       Int  
+  categoryId       Int         @default(1)
   savedInPlaylist  Boolean     @default(false)    
 
   savedByUsers      SavedVideo[]    

@@ -1008,8 +1008,9 @@ app.patch('/videos/:id', async (req, res) => {
 
         })
 
-        let getAllVideos = await prisma.video.findMany({
+        let getVideo = await prisma.video.findFirst({
 
+          where: { id: idParam },
           include: 
         { 
 
@@ -1056,7 +1057,7 @@ app.patch('/videos/:id', async (req, res) => {
     
         })
 
-        res.send(getAllVideos)
+        res.send(getVideo)
 
       }
 
@@ -2727,6 +2728,56 @@ app.post('/videoLikes', async (req, res) => {
   try {
 
     const user = await getUserFromToken(token)
+
+    const videoFullBefore = await prisma.video.findFirst({
+
+      where: { id: Number(videoId) },
+
+      include: { 
+
+        userWhoCreatedIt: { include: { avatar: true } }, 
+
+        comments: { include: { userWhoCreatedIt: true, video: true } }, 
+        category: true,
+        hashtags: { include: { hashtag: true } },
+        //@ts-ignore
+        savedByUsers: { include: { user: true } },
+        usersWhoLikedIt: { 
+          include: { 
+          user: {
+          include: { 
+            videos: true, 
+            logins: true, 
+            comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+            avatar: { include: { user: true } }, 
+            commentsLiked: { include: {comment: true} },
+            commentsDisliked: { include: {comment: true} },
+            videosLiked:  { include: { video: true} },
+            videosDisliked:  { include: { video: true} },
+            subscribedBy: { include: { subscribing: true } },
+            subscribing:  { include: { subscriber: true } } } }, video: true 
+          }
+        },
+        usersWhoDislikedIt: { 
+          include: { 
+          user: {
+          include: { 
+            videos: true, 
+            logins: true, 
+            comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+            avatar: { include: { user: true } }, 
+            commentsLiked: { include: {comment: true} },
+            commentsDisliked: { include: {comment: true} },
+            videosLiked:  { include: { video: true} },
+            videosDisliked:  { include: { video: true} },
+            subscribedBy: { include: { subscribing: true } },
+            subscribing:  { include: { subscriber: true } } } }, video: true 
+          }
+        }
+    }
+
+    })
+
     //@ts-ignore
     const matchVideoLike = await prisma.videoLike.findFirst({where: { userId: user.id, videoId: videoId} })
     
@@ -2736,7 +2787,7 @@ app.post('/videoLikes', async (req, res) => {
 
         await prisma.videoLike.create({data: newVideoLike})
         
-        const videoFull = await prisma.video.findFirst({
+        const videoFullAfter = await prisma.video.findFirst({
 
           where: { id: Number(videoId) },
 
@@ -2785,7 +2836,7 @@ app.post('/videoLikes', async (req, res) => {
 
         })
 
-        res.send(videoFull)
+        res.send(videoFullAfter)
         
       }
 
@@ -2797,9 +2848,8 @@ app.post('/videoLikes', async (req, res) => {
     }
 
     else {
-      res.status(404).send({ error: 'user is not authorized to do this' })
+      res.send(videoFullBefore)
     }
-
 
   }
 
@@ -3021,7 +3071,7 @@ app.get('/videoDislikes/:id', async (req, res) => {
 
 })
 
-app.post('/videoLikes', async (req, res) => {
+app.post('/videoDislikes', async (req, res) => {
     
   const token = req.headers.authorization || ''
   
@@ -3042,6 +3092,56 @@ app.post('/videoLikes', async (req, res) => {
   try {
 
     const user = await getUserFromToken(token)
+
+    const videoFullBefore = await prisma.video.findFirst({
+
+      where: { id: Number(videoId) },
+
+      include: { 
+
+        userWhoCreatedIt: { include: { avatar: true } }, 
+
+        comments: { include: { userWhoCreatedIt: true, video: true } }, 
+        category: true,
+        hashtags: { include: { hashtag: true } },
+        //@ts-ignore
+        savedByUsers: { include: { user: true } },
+        usersWhoLikedIt: { 
+          include: { 
+          user: {
+          include: { 
+            videos: true, 
+            logins: true, 
+            comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+            avatar: { include: { user: true } }, 
+            commentsLiked: { include: {comment: true} },
+            commentsDisliked: { include: {comment: true} },
+            videosLiked:  { include: { video: true} },
+            videosDisliked:  { include: { video: true} },
+            subscribedBy: { include: { subscribing: true } },
+            subscribing:  { include: { subscriber: true } } } }, video: true 
+          }
+        },
+        usersWhoDislikedIt: { 
+          include: { 
+          user: {
+          include: { 
+            videos: true, 
+            logins: true, 
+            comments: { include: { userWhoCreatedIt: true, video: { include: { userWhoCreatedIt: true }}} }, 
+            avatar: { include: { user: true } }, 
+            commentsLiked: { include: {comment: true} },
+            commentsDisliked: { include: {comment: true} },
+            videosLiked:  { include: { video: true} },
+            videosDisliked:  { include: { video: true} },
+            subscribedBy: { include: { subscribing: true } },
+            subscribing:  { include: { subscriber: true } } } }, video: true 
+          }
+        }
+    }
+
+    })
+
     //@ts-ignore
     const matchVideoDislike = await prisma.videoDislike.findFirst({where: { userId: user.id, videoId: videoId} })
     
@@ -3049,7 +3149,7 @@ app.post('/videoLikes', async (req, res) => {
 
       try {
 
-        await prisma.videoLike.create({data: newVideoDislike})
+        await prisma.videoDislike.create({data: newVideoDislike})
         
         const videoFull = await prisma.video.findFirst({
 
@@ -3112,7 +3212,7 @@ app.post('/videoLikes', async (req, res) => {
     }
 
     else {
-      res.status(404).send({ error: 'user is not authorized to do this' })
+      res.send(videoFullBefore)
     }
 
 
