@@ -968,6 +968,7 @@ app.patch('/videos/:id', async (req, res) => {
     views,
     countCommentsInside,
     countLikesInside,
+    countDislikesInside,
     src, 
     userId,
     categoryId
@@ -978,8 +979,9 @@ app.patch('/videos/:id', async (req, res) => {
     createdAt: createdAt,
     updatedAt: updatedAt,
     views: views,
-    countCommentsInside,
-    countLikesInside,
+    countCommentsInside: countCommentsInside,
+    countLikesInside: countLikesInside,
+    countDislikesInside: countDislikesInside,
     src:  src,
     userId: userId,
     categoryId: categoryId
@@ -1001,7 +1003,7 @@ app.patch('/videos/:id', async (req, res) => {
         await prisma.video.update({
 
           where: {
-            id: user.id
+            id: idParam
           },
 
           data: updatedVideo
@@ -1062,19 +1064,19 @@ app.patch('/videos/:id', async (req, res) => {
       }
 
       catch(error) {
-        res.status(404).send({message: error})
+        res.status(404).send({error: error})
       }
 
     }
 
     else {
-      throw Error('Error!')
+      throw Error("Error !")
     }
 
   } 
   
   catch(error) {
-    res.status(404).send({message: error})
+    res.status(404).send({error: error})
   }
 
 })
@@ -1488,7 +1490,8 @@ app.patch('/comments/:id', async (req, res) => {
     updatedAt, 
     userId, 
     videoId,
-    countLikesInside
+    countLikesInside,
+    countDislikesInside
   } = req.body
   
   const updatedComment = {
@@ -1497,7 +1500,8 @@ app.patch('/comments/:id', async (req, res) => {
     updatedAt: updatedAt,
     userId: userId,
     videoId: videoId,
-    countLikesInside: countLikesInside
+    countLikesInside: countLikesInside,
+    countDislikesInside: countDislikesInside
   }
 
   try {
@@ -1516,7 +1520,7 @@ app.patch('/comments/:id', async (req, res) => {
         await prisma.comment.update({
 
           where: {
-            id: user.id,
+            id: idParam,
           },
 
           data: updatedComment
@@ -2779,9 +2783,9 @@ app.post('/videoLikes', async (req, res) => {
     })
 
     //@ts-ignore
-    const matchVideoLike = await prisma.videoLike.findFirst({where: { userId: user.id, videoId: videoId} })
-    
-    if (user && matchVideoLike === undefined || matchVideoLike === null) {
+    const matchVideoLike = await prisma.videoLike.findFirst( { where: { userId: user.id, videoId: videoId } } )
+  
+    if (user && (matchVideoLike === undefined || matchVideoLike === null) ) {
 
       try {
 
@@ -3145,7 +3149,7 @@ app.post('/videoDislikes', async (req, res) => {
     //@ts-ignore
     const matchVideoDislike = await prisma.videoDislike.findFirst({where: { userId: user.id, videoId: videoId} })
     
-    if (user && matchVideoDislike === undefined || matchVideoDislike === null) {
+    if (user && (matchVideoDislike === undefined || matchVideoDislike === null) ) {
 
       try {
 
